@@ -23,6 +23,15 @@ app.use("/api/admin", require("./routes/admin"));     // admin-only routes
 
 app.get("/api/health", (req, res) => res.json({ status: "ok", service: "earn-apple-backend" }));
 
+// ---------- Global error handler ----------
+// Koi bhi route crash ho (jaise validation error), yeh handler use hamesha
+// readable JSON me convert karega instead of raw HTML error page — taaki
+// admin panel / mini app ko hamesha samajh aane wala error message mile.
+app.use((err, req, res, next) => {
+  console.error("Unhandled error:", err);
+  res.status(500).json({ error: err.message || "Internal server error" });
+});
+
 const PORT = process.env.PORT || 5000;
 
 mongoose
