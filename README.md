@@ -100,6 +100,6 @@ Is secret ko kabhi kisi ke saath share mat karna.
 | `/api/wallet/swap` | POST | APPLE → USDT swap |
 | `/api/wallet/withdraw` | POST | Withdraw request |
 | `/api/wallet/history` | GET | Transaction history |
-| `/api/admin/*` | — | Admin-only routes (users, promo, tasks, withdrawals) |
+| `/api/admin/*` | — | Admin-only routes (users, promo, tasks, withdrawals) | 
 
 Koi bhi step me atke to bata dena, us specific step ka aur detail me help kar dunga.
