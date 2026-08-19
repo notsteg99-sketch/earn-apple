@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EARN APPLE — Admin</title>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0E1410; --surface:#171F19; --surface-2:#1F2A22; --line:#2A362D;
-    --leaf:#4CAF6D; --leaf-dim:#3A8656; --orchard:#C8383F; --gold:#E8B84B;
-    --text:#F3F1E9; --text-dim:#9AA69C; --text-faint:#65726A;
-    --success:#4CAF6D; --pending:#E8B84B; --danger:#C8383F;
-    --font-display:'Fraunces', serif; --font-body:'Inter', sans-serif; --font-mono:'IBM Plex Mono', monospace;
+    --bg:#0A0A0C; --surface:#131316; --surface-2:#1B1B1F; --line:#28282D;
+    --leaf:#D4AF37; --leaf-dim:#A8862C; --orchard:#E0555C; --gold:#D4AF37;
+    --text:#F2F2F0; --text-dim:#9B9BA1; --text-faint:#5E5E64;
+    --success:#3FB16F; --pending:#D4AF37; --danger:#E0555C;
+    --font-display:'Manrope', sans-serif; --font-body:'Inter', sans-serif; --font-mono:'IBM Plex Mono', monospace;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   body{ background:var(--bg); color:var(--text); font-family:var(--font-body); min-height:100vh; }
@@ -166,14 +166,40 @@ let ADMIN_ID = "";
 let ADMIN_SECRET = "";
 let API_URL = "";
 
-function login(){
-  ADMIN_ID = document.getElementById('adminIdInput').value.trim();
-  ADMIN_SECRET = document.getElementById('adminSecretInput').value.trim();
-  API_URL = document.getElementById('apiUrlInput').value.trim().replace(/\/$/,'');
-  if(!ADMIN_ID || !ADMIN_SECRET || !API_URL){ alert('Saari fields bharo'); return; }
-  document.getElementById('loginScreen').style.display='none';
-  document.getElementById('dashboard').style.display='block';
-  loadAll();
+async function login(){
+  const id = document.getElementById('adminIdInput').value.trim();
+  const secret = document.getElementById('adminSecretInput').value.trim();
+  const url = document.getElementById('apiUrlInput').value.trim().replace(/\/$/,'');
+  if(!id || !secret || !url){ alert('Saari fields bharo'); return; }
+
+  const btn = document.querySelector('.login-box button');
+  const originalText = btn.textContent;
+  btn.textContent = 'Checking…';
+  btn.disabled = true;
+
+  try{
+    // Backend se verify karo ki ID + secret dono sahi hain, tabhi login hone do
+    const res = await fetch(url + '/api/admin/users', {
+      headers: { 'x-admin-id': id, 'x-admin-secret': secret }
+    });
+    if(!res.ok){
+      const e = await res.json().catch(()=>({error:'Login failed'}));
+      alert(e.error || 'Invalid Telegram ID or Admin secret');
+      btn.textContent = originalText;
+      btn.disabled = false;
+      return;
+    }
+
+    // Sahi hai — ab login karo
+    ADMIN_ID = id; ADMIN_SECRET = secret; API_URL = url;
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('dashboard').style.display='block';
+    loadAll();
+  }catch(err){
+    alert('Could not reach backend — check the URL and your internet connection');
+    btn.textContent = originalText;
+    btn.disabled = false;
+  }
 }
 function logout(){
   document.getElementById('dashboard').style.display='none';
