@@ -633,7 +633,18 @@ async function spinWheel() {
 function showMonetagAd() {
   return new Promise((resolve, reject) => {
     if (typeof show_11616923 !== "function") { reject(new Error("no_ad")); return; }
-    show_11616923().then(resolve).catch(() => reject(new Error("no_ad")));
+    // catchIfNoFeed: true — Monetag docs ke mutabik, isske bina agar ad na mile to
+    // Promise "silently resolve" ho jata hai (bina ad dikhaye hi success maan leta),
+    // jisse fallback (Adsgram) kabhi trigger hi nahi hota. Isse explicitly reject karwate hain.
+    show_11616923({ type: "end", catchIfNoFeed: true })
+      .then((result) => {
+        console.log("Monetag ad result:", result);
+        resolve(result);
+      })
+      .catch((err) => {
+        console.warn("Monetag: no ad available, falling back to Adsgram", err?.message);
+        reject(new Error("no_ad"));
+      });
   });
 }
 
@@ -641,7 +652,9 @@ function showAdsgramAd() {
   return new Promise((resolve, reject) => {
     if (!ADSGRAM_BLOCK_ID || !window.Adsgram) { reject(new Error("no_ad")); return; }
     const controller = window.Adsgram.init({ blockId: ADSGRAM_BLOCK_ID });
-    controller.show().then(resolve).catch(() => reject(new Error("no_ad")));
+    controller.show()
+      .then((result) => { console.log("Adsgram ad result:", result); resolve(result); })
+      .catch((err) => { console.warn("Adsgram: no ad available", err?.message || err); reject(new Error("no_ad")); });
   });
 }
 
