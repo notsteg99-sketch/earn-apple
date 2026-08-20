@@ -7,6 +7,7 @@
 <title>EARN APPLE</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+<script src='//libtl.com/sdk.js' data-zone='11616923' data-sdk='show_11616923'></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
@@ -628,13 +629,25 @@ async function spinWheel() {
   }
 }
 
-/* ---------------- ADSGRAM ---------------- */
-function showRewardAd() {
+/* ---------------- AD WATERFALL: Monetag first, Adsgram fallback ---------------- */
+function showMonetagAd() {
+  return new Promise((resolve, reject) => {
+    if (typeof show_11616923 !== "function") { reject(new Error("no_ad")); return; }
+    show_11616923().then(resolve).catch(() => reject(new Error("no_ad")));
+  });
+}
+
+function showAdsgramAd() {
   return new Promise((resolve, reject) => {
     if (!ADSGRAM_BLOCK_ID || !window.Adsgram) { reject(new Error("no_ad")); return; }
     const controller = window.Adsgram.init({ blockId: ADSGRAM_BLOCK_ID });
     controller.show().then(resolve).catch(() => reject(new Error("no_ad")));
   });
+}
+
+// Monetag pehle try hota hai (primary), Adsgram fallback me
+function showRewardAd() {
+  return showMonetagAd().catch(() => showAdsgramAd());
 }
 
 async function watchAdClaim() {
