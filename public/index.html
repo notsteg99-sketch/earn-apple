@@ -6,7 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>EARN APPLE</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 <script src='//libtl.com/sdk.js' data-zone='11616923' data-sdk='show_11616923'></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
@@ -445,7 +444,7 @@ function iconBnb(size = 28) {
    EARN APPLE — connected to live backend
    ========================================================= */
 const API_BASE = "https://earn-apple-production-aad6.up.railway.app";
-const ADSGRAM_BLOCK_ID = "43669";
+// ADSGRAM_BLOCK_ID = "43669"; — filhal disabled hai, sirf Monetag use ho raha hai
 
 const tg = window.Telegram?.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
@@ -629,38 +628,29 @@ async function spinWheel() {
   }
 }
 
-/* ---------------- AD WATERFALL: Monetag first, Adsgram fallback ---------------- */
+/* ---------------- MONETAG (Adsgram temporarily disabled) ---------------- */
 function showMonetagAd() {
   return new Promise((resolve, reject) => {
     if (typeof show_11616923 !== "function") { reject(new Error("no_ad")); return; }
     // catchIfNoFeed: true — Monetag docs ke mutabik, isske bina agar ad na mile to
-    // Promise "silently resolve" ho jata hai (bina ad dikhaye hi success maan leta),
-    // jisse fallback (Adsgram) kabhi trigger hi nahi hota. Isse explicitly reject karwate hain.
+    // Promise "silently resolve" ho jata hai (bina ad dikhaye hi success maan leta).
+    // Isse explicitly reject karwate hain taaki hum sahi se "no ad" dikha sakein.
     show_11616923({ type: "end", catchIfNoFeed: true })
       .then((result) => {
         console.log("Monetag ad result:", result);
         resolve(result);
       })
       .catch((err) => {
-        console.warn("Monetag: no ad available, falling back to Adsgram", err?.message);
+        console.warn("Monetag: no ad available", err?.message);
         reject(new Error("no_ad"));
       });
   });
 }
 
-function showAdsgramAd() {
-  return new Promise((resolve, reject) => {
-    if (!ADSGRAM_BLOCK_ID || !window.Adsgram) { reject(new Error("no_ad")); return; }
-    const controller = window.Adsgram.init({ blockId: ADSGRAM_BLOCK_ID });
-    controller.show()
-      .then((result) => { console.log("Adsgram ad result:", result); resolve(result); })
-      .catch((err) => { console.warn("Adsgram: no ad available", err?.message || err); reject(new Error("no_ad")); });
-  });
-}
-
-// Monetag pehle try hota hai (primary), Adsgram fallback me
+// Filhal sirf Monetag use ho raha hai. Ad complete hote hi (resolve) turant backend
+// call hota hai (upar watchAdEarn/watchAdClaim me) jo reward credit karta hai aur count badhata hai.
 function showRewardAd() {
-  return showMonetagAd().catch(() => showAdsgramAd());
+  return showMonetagAd();
 }
 
 async function watchAdClaim() {
