@@ -8,6 +8,11 @@ const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
 
 const APP_URL = process.env.APP_URL || "https://earn-apple-production-aad6.up.railway.app";
 
+// MTProto proxy — un users ke liye jinke desh me Telegram block/throttle hai (jaise Russia).
+// Isse Telegram khud connect ho jata hai proxy ke through.
+const PROXY_LINK =
+  "https://t.me/proxy?server=altaria.proxy.rlwy.net&port=54175&secret=ee2b34db1a9684d484f41e3befa5788f1a7777772e676f6f676c652e636f6d";
+
 bot.onText(/^\/start(?:\s+(.+))?/, (msg, match) => {
   const chatId = msg.chat.id;
   const firstName = msg.from.first_name || "there";
@@ -21,7 +26,8 @@ bot.onText(/^\/start(?:\s+(.+))?/, (msg, match) => {
     `• Invite friends and earn 10% commission for life\n` +
     `• Withdraw instantly once you're ready to cash out\n` +
     `• 24/7 support available\n\n` +
-    `Tap the button below to get started.`;
+    `Tap the button below to get started.\n\n` +
+    `Can't access Telegram in your country? Use the proxy button below to connect.`;
 
   // Referral ID ko Open App button ke URL me query param ke roop me daal dete hain,
   // taaki Mini App khulte hi usse read kar sake (Telegram start_param hamesha reliably
@@ -30,7 +36,10 @@ bot.onText(/^\/start(?:\s+(.+))?/, (msg, match) => {
 
   bot.sendMessage(chatId, text, {
     reply_markup: {
-      inline_keyboard: [[{ text: "Open App", web_app: { url: appUrl } }]],
+      inline_keyboard: [
+        [{ text: "Open App", web_app: { url: appUrl } }],
+        [{ text: "🌐 Enable Proxy (can't access?)", url: PROXY_LINK }],
+      ],
     },
   }).catch((err) => console.error("Failed to send /start message:", err.message));
 });
